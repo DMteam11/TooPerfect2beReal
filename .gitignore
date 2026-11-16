@@ -1,0 +1,12 @@
+__pycache__/
+.ipynb_checkpoints/
+.venv/
+*.py[cod]
+/data/demo/
+/data/demo_manifest.csv
+/results/*
+!/results/.gitkeep
+*.pt
+*.pth
+*.ckpt
+

@@ -1,0 +1,8 @@
+{
+  "experiment": "performance",
+  "model": "demo",
+  "manifest": "data/demo_manifest.csv",
+  "split": "test",
+  "output_dir": "results/demo_performance"
+}
+
