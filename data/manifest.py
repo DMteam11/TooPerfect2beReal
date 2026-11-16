@@ -1,4 +1,4 @@
-"""讀取共用樣本清單，讓所有實驗使用同一批影像。"""
+"""讀取共用樣本清單，欄位定義見 INTERFACE_CONTRACT.md。"""
 
 from __future__ import annotations
 
@@ -18,11 +18,14 @@ class Sample:
     sample_id: str
     path: Path
     label: int  # 0：真實影像；1：生成影像。
-    source: str  # 例如 FFHQ、StyleGAN2、DDPM。
+    source: str  # 資料集或子來源，例如 140k、dff_wiki。
     split: str  # 例如 pilot、val、test。
+    generator: str | None = None  # 真圖留空，假圖記生成方法。
 
 
-def load_manifest(manifest_path: Path, split: str | None = None) -> list[Sample]:
+def load_manifest(
+    manifest_path: Path, split: str | None = None, *, require_generator: bool = False
+) -> list[Sample]:
     """讀取 CSV；相對影像路徑以 CSV 所在目錄為基準。"""
     manifest_path = manifest_path.resolve()
     if not manifest_path.is_file():
@@ -32,7 +35,10 @@ def load_manifest(manifest_path: Path, split: str | None = None) -> list[Sample]
     seen_ids: set[str] = set()
     with manifest_path.open(newline="", encoding="utf-8-sig") as file:
         reader = csv.DictReader(file)
-        missing = set(REQUIRED_COLUMNS) - set(reader.fieldnames or [])
+        columns = set(REQUIRED_COLUMNS)
+        if require_generator:
+            columns.add("generator")
+        missing = columns - set(reader.fieldnames or [])
         if missing:
             raise ValueError(f"樣本清單缺少欄位：{', '.join(sorted(missing))}")
 
@@ -42,6 +48,12 @@ def load_manifest(manifest_path: Path, split: str | None = None) -> list[Sample]
                 raise ValueError(f"第 {row_number} 列有空白的必要欄位")
             if values["label"] not in {"0", "1"}:
                 raise ValueError(f"第 {row_number} 列 label 必須是 0 或 1")
+            generator = (row.get("generator") or "").strip() or None
+            if require_generator:
+                if values["label"] == "1" and generator is None:
+                    raise ValueError(f"第 {row_number} 列是假圖，generator 必須填寫")
+                if values["label"] == "0" and generator is not None:
+                    raise ValueError(f"第 {row_number} 列是真圖，generator 應留空")
             if values["sample_id"] in seen_ids:
                 raise ValueError(f"sample_id 重複：{values['sample_id']}")
             seen_ids.add(values["sample_id"])
@@ -60,6 +72,7 @@ def load_manifest(manifest_path: Path, split: str | None = None) -> list[Sample]
                     label=int(values["label"]),
                     source=values["source"],
                     split=values["split"],
+                    generator=generator,
                 )
             )
 

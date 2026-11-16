@@ -1,0 +1,9 @@
+{
+  "experiment": "performance",
+  "model": "cnndetection",
+  "weights": "weights/cnndetection.pth",
+  "device": "cpu",
+  "manifest": "data/pilot_manifest.csv",
+  "split": "pilot",
+  "output_dir": "results/pilot_cnndetection"
+}

@@ -29,9 +29,12 @@ def main() -> None:
             "label": label,
             "source": "toy_real" if label == 0 else "toy_fake",
             "split": "test",
+            "generator": "toy_brightness" if label == 1 else "",
         })
     with MANIFEST.open("w", newline="", encoding="utf-8") as file:
-        writer = csv.DictWriter(file, fieldnames=["sample_id", "path", "label", "source", "split"])
+        writer = csv.DictWriter(
+            file, fieldnames=["sample_id", "path", "label", "source", "split", "generator"]
+        )
         writer.writeheader()
         writer.writerows(rows)
     print(f"已建立示範資料：{MANIFEST}")

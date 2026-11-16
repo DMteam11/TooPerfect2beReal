@@ -1,71 +1,60 @@
-# 專案實作準則
+# 專案使用指南
 
-這個 `project/` 是大家共用的實驗骨架。**目前只有 `demo` 假模型和效能評估可以跑通；它們只用來檢查流程，不能當研究結果。** CNNDetection、UnivFD、SyntheticSight 的權重與推論程式還沒有接入。
+這份指南說明怎麼安裝、跑示範、接入模型和交付結果。資料欄位、模型 API 與驗收條件請看 [Interface Contract](INTERFACE_CONTRACT.md)。
 
-## 先跑一次示範
+## 1. 跑一次示範
 
-在專案最外層執行：
+以下命令從本 Git repo 根目錄執行，也就是有 `run.py` 的 `project/`：
 
 ```bash
-python3 -m pip install -r project/requirements.txt
-python3 project/examples/make_demo_data.py
-python3 project/run.py --config project/configs/demo.json
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt
+python examples/make_demo_data.py
+python run.py --config configs/demo.json --check-interface
+python run.py --config configs/demo.json
 ```
 
-結果會在 `project/results/demo_performance/`：
+若已有虛擬環境，直接啟用即可。Demo 使用四張合成示範圖和亮度分數，只供檢查路徑、讀圖及結果輸出。驗收模式會印出檢查結果。正式執行模式會在 `results/demo_performance/` 產生 `predictions.csv`、`summary.json` 與 `run_info.json`。同一輸出位置再次執行會覆寫結果。
 
-- `predictions.csv`：每張圖的分數與預測，方便找錯誤案例。
-- `summary.json`：整體與各來源的簡單指標。某來源沒有真圖或假圖時，相關指標會是 `null`。
+## 2. 第一階段怎麼開工
 
-重新執行同一設定會覆寫該輸出資料夾裡的這兩個檔案。正式實驗請替每組模型與實驗指定不同的 `output_dir`。
-
-## 各人改哪裡
-
-| 範圍 | 負責內容 |
+| 成員 | 可先從這裡開始 |
 | --- | --- |
-| `data/` | 共用樣本清單、讀圖；所有人使用同一批測試影像與 `sample_id`。 |
-| `models/` | 各模型的載入、專用前處理、分數方向與門檻。接模型的人新增檔案並登記到 `registry.py`。 |
-| `experiments/performance/` | A：所有模型的效能與跨來源比較；已有最小範例。 |
-| `experiments/xai/` | B：所有模型的歸因方法與視覺化；需要記錄各模型實際用的方法。 |
-| `experiments/occlusion/` | C：所有模型的遮擋與局部擾動；同樣的擾動設定要套用到同一批影像。 |
-| `experiments/features/` | D：臉部特徵統計、概念測試與控制組。 |
-| `configs/` | 一次執行的模型、資料、實驗、輸出位置設定。 |
-| `results/` | 程式輸出；請勿手改數值。 |
-| `notebooks/` | 四個實驗各自的探索空間；範本示範如何使用共用資料與模型。 |
+| HSIANG | 在 `models/univfd.py` 接入 UnivFD，記錄權重、官方前處理及 ViT 候選層。 |
+| WEI | 在 `models/syntheticsight.py` 接入 SyntheticSight，與 YUZI 核對 140k 的訓練及驗證重疊。 |
+| YUZI | 依 `data/manifest_template.csv` 整理資料。先交一份包含真、假圖的小清單，供三模型驗收。 |
+| DA | 在 `models/cnndetection.py` 接入 CNNDetection，維護共用入口並負責三模型整合驗收。 |
 
-**分工以實驗為主軸。** 例如 C 完成遮擋實驗後，由 C 用共用模型介面跑每個模型並比較結果。模型接入是前期共同工作，可以分人接不同模型；不代表往後每人只分析自己的模型。
+模型接入時，照 [Interface Contract](INTERFACE_CONTRACT.md#2-模型-api) 完成 adapter，然後在 `models/registry.py` 登記 factory。正式模型使用各自需要的 PyTorch 與依賴，照模型官方設定準備環境，並記錄實際測試的版本與裝置。權重可以放在本機 `weights/`，大型資料另行管理。
 
-## 如何使用 notebook
-
-從專案最外層執行以下指令，或在 VS Code 安裝 Jupyter 擴充套件並選擇同一個 Python 環境：
+複製 `configs/formal.example.json` 為本機設定檔，改成實際模型、權重、小清單、切分、裝置和輸出資料夾。每個模型各用一份設定和不同的輸出資料夾。驗收時使用相同的小清單及切分。
 
 ```bash
-python3 -m pip install -r requirements-notebook.txt
-python3 project/examples/make_demo_data.py
-python3 -m notebook project/notebooks
+cp configs/formal.example.json configs/cnndetection.local.json
+# 編輯本機設定檔後執行。
+python run.py --config configs/cnndetection.local.json --check-interface
+python run.py --config configs/cnndetection.local.json
 ```
 
-開啟 `notebooks/00_example.ipynb`，依序執行每個儲存格。它會載入示範清單、顯示一張假資料，並呼叫共用的 `demo` 模型。這些資料和分數只供測試；建立示範資料時會覆寫先前產生的同名示範檔案。
+先用第一條 Python 命令確認一般分數及梯度，再用第二條確認逐圖 CSV 可寫出。範本所指的正式 adapter、權重及清單要先由負責人接入。把模型、權重版本、裝置和驗收結果交給 DA。
 
-每個人可以把範例複製到自己的資料夾：A 用 `notebooks/performance/`、B 用 `notebooks/xai/`、C 用 `notebooks/occlusion/`、D 用 `notebooks/features/`。在 notebook 裡先探索影像、測試想法及畫圖；確定後，把正式分析邏輯整理進對應的 `experiments/`，並在 `run.py` 的共同入口執行，讓組員能重跑。呼叫共用的 `data/`、`models/`，以維持相同樣本與模型前處理。
+## 3. Notebook 和第二階段工作區
 
-分享 notebook 前，建議清除輸出並從第一格重新執行一次，確認沒有依賴先前隱藏的執行狀態；記下使用的模型、樣本清單、實驗參數與套件版本。大型資料、權重及產生的結果請另行管理。
+使用 notebook 時，從同一個虛擬環境執行：
 
-## 共用約定
+```bash
+python -m pip install -r requirements-notebook.txt
+python -m notebook notebooks
+```
 
-1. **資料清單**：CSV 必須有 `sample_id,path,label,source,split`。`label=0` 是真圖，`label=1` 是生成圖；`source` 填資料或生成器來源。影像的相對路徑從 CSV 所在資料夾起算。可複製 `data/manifest_template.csv` 開始填。
-2. **模型輸入**：`score_fake(image)` 收到的是 `H×W×3` 的 RGB `uint8` 陣列。各模型需要的尺寸、正規化、裝置及批次處理，放在自己的模型檔案裡。
-3. **模型輸出**：回傳 `0～1` 的分數，**越高越偏向生成圖**。這個分數不一定是校準過的機率。若原模型輸出方向相反，adapter 要先轉換。`threshold` 寫在模型 adapter；若需自行選門檻，只能用獨立驗證集，不能看測試集調整。
-4. **公平比較**：先固定測試清單、切分和來源標籤，再讓所有模型跑同一批影像。不要把模型訓練過的影像或近乎重複的影像放進獨立測試集。
-5. **結果可追溯**：每筆結果保留 `sample_id`、模型、來源、原始分數及實驗設定。遮擋與 XAI 額外記錄方法、參數和必要的對照條件。
-6. **缺功能要明說**：目前 B、C、D 的 `run.py` 會明確回報「尚待實作」。接手者要在自己的目錄完成它，不要輸出看似正式的空白結果。
+先開 `notebooks/00_example.ipynb`。可在各實驗的 notebook 資料夾探索，將能重跑的程式整理到 `experiments/`。
 
-## 接入正式模型的最短步驟
+| 工作區 | 如何交接 |
+| --- | --- |
+| `experiments/performance/` | DA 從 YUZI 的同一份正式清單跑三模型，交出各模型的 `predictions.csv`。YUZI 負責效能指標、信賴區間及 FP/FN 清單。 |
+| `experiments/occlusion/` | HSIANG 維護共用 ROI／Mask 工具並交給 DA，也負責原圖與修改圖的分數比較。 |
+| `experiments/features/` | DA 使用共用 ROI 逐圖計算特徵並完成 TCAV。YUZI 用特徵表與模型分數做組間比較和相關分析。 |
+| `experiments/xai/` | WEI 使用 DA 的分數和 YUZI 提供的誤判清單，挑案例並產出熱圖。 |
 
-1. 在 `models/` 新增一個類別，繼承 `FaceDetector`，設定 `name`、`threshold`，實作 `score_fake`。
-2. 在 `models/registry.py` 登記名稱與建立模型的函式。權重路徑可以從專用設定檔或環境變數讀取，不要把權重放進版本控制。
-3. 用少量已知樣本確認：RGB 順序正確、真／假分數方向正確、輸出在 `0～1`，並確認門檻來源。
-4. 複製 `configs/demo.json`，改成正式模型名稱、正式 manifest 與獨立輸出資料夾，再執行 `run.py`。
-
-先接通一個正式模型與 A 的流程，再由 B、C、D 沿著同一份清單和模型介面擴充；其餘模型接入後，不必重寫各實驗的資料讀取與執行入口。
-
+正式跑三模型時，先確認每份設定都指向同一個 test 清單。分享結果時保留程式產出的 CSV、執行紀錄和必要設定。三個正式模型接入前可用 demo 驗證流程，XAI、遮擋及特徵／TCAV 的正式實驗入口會在實作前明確提示。

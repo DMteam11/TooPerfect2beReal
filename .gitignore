@@ -4,6 +4,8 @@ __pycache__/
 *.py[cod]
 /data/demo/
 /data/demo_manifest.csv
+/weights/
+/configs/*.local.json
 /results/*
 !/results/.gitkeep
 *.pt
