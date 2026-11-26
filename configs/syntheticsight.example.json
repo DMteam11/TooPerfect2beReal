@@ -1,0 +1,9 @@
+{
+  "experiment": "performance",
+  "model": "syntheticsight",
+  "weights": "weights/syntheticsight.pth",
+  "device": "cpu",
+  "manifest": "data/pilot_manifest.csv",
+  "split": "pilot",
+  "output_dir": "results/pilot_syntheticsight"
+}

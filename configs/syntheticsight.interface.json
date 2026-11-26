@@ -1,0 +1,9 @@
+{
+  "experiment": "performance",
+  "model": "syntheticsight",
+  "weights": "weights/syntheticsight.pth",
+  "device": "cpu",
+  "manifest": "data/demo_manifest.csv",
+  "split": "test",
+  "output_dir": "results/syntheticsight_interface_fixtures"
+}
