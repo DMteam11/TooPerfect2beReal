@@ -1,0 +1,15 @@
+{
+  "date_local": "2026-11-27",
+  "timezone": "Asia/Taipei",
+  "project_base_commit": "5b457c56a531f7679da3de91e46cadd0e8a608b0",
+  "upstream_commit": "8d4c81c9f5cac65d66f2ddebd02f2111f0f1c3c7",
+  "weights_sha256": "d9a7fd6a692c942b550f9848500dc3ffb10d5809cb0d0091990648bf369ad21c",
+  "device_tested": "cpu",
+  "unittest": {"command": "python -m unittest discover -s tests -v", "passed": 5, "failed": 0, "skipped": 0},
+  "official_parity": {"fixture_count": 4, "preprocessing_exact": true, "maximum_logit_error": 0.0, "maximum_score_error": 0.0},
+  "interface_check": {"passed": true, "input_gradient": true, "activation_gradient_layers": ["layer3", "layer4"], "data": "artificial pixel fixtures"},
+  "performance_cli": {"passed": true, "fixture_count": 4, "outputs": ["predictions.csv", "summary.json", "run_info.json"], "accuracy_interpretation": "not meaningful on artificial fixtures"},
+  "demo_regression": {"interface_cli_passed": true, "performance_cli_passed": true, "torch_lazy_import_test_passed": true},
+  "pending": ["YUZI shared real/fake face manifest acceptance", "140k train/validation image-level overlap audit", "DA shared environment integration acceptance"],
+  "not_tested": ["CUDA", "MPS", "real face accuracy", "600-image pilot", "three-model evaluation", "phase 2 XAI"]
+}

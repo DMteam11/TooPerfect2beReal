@@ -17,8 +17,15 @@ def _create_demo(*, weights_path: Path | None, device: str) -> FaceDetector:
     return DemoBrightnessDetector()
 
 
+def _create_syntheticsight(*, weights_path: Path | None, device: str) -> FaceDetector:
+    from models.syntheticsight import create_syntheticsight
+
+    return create_syntheticsight(weights_path=weights_path, device=device)
+
+
 MODEL_REGISTRY: dict[str, ModelFactory] = {
     "demo": _create_demo,
+    "syntheticsight": _create_syntheticsight,
     # 接入後依約定新增 cnndetection、univfd、syntheticsight。
     # 可在各自的 factory 內再匯入模型套件，讓 demo 維持不需要 PyTorch。
 }

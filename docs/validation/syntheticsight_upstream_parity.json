@@ -1,0 +1,47 @@
+{
+  "device": "cpu",
+  "torch": "2.15.0+cpu",
+  "cases": [
+    {
+      "shape": [
+        16,
+        16,
+        3
+      ],
+      "preprocessing_exact": true,
+      "max_logit_error": 0.0,
+      "score_error": 0.0
+    },
+    {
+      "shape": [
+        224,
+        224,
+        3
+      ],
+      "preprocessing_exact": true,
+      "max_logit_error": 0.0,
+      "score_error": 0.0
+    },
+    {
+      "shape": [
+        301,
+        187,
+        3
+      ],
+      "preprocessing_exact": true,
+      "max_logit_error": 0.0,
+      "score_error": 0.0
+    },
+    {
+      "shape": [
+        93,
+        311,
+        3
+      ],
+      "preprocessing_exact": true,
+      "max_logit_error": 0.0,
+      "score_error": 0.0
+    }
+  ],
+  "scope": "Official inference parity on pixel fixtures; not accuracy validation"
+}
