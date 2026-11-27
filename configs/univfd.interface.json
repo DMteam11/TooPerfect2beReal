@@ -1,0 +1,9 @@
+{
+  "experiment": "performance",
+  "model": "univfd",
+  "weights": "weights/univfd_fc_weights.pth",
+  "device": "cpu",
+  "manifest": "data/demo/univfd_fixture_manifest.csv",
+  "split": "test",
+  "output_dir": "results/univfd_interface_fixtures"
+}

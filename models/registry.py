@@ -17,10 +17,19 @@ def _create_demo(*, weights_path: Path | None, device: str) -> FaceDetector:
     return DemoBrightnessDetector()
 
 
+def _create_univfd(*, weights_path: Path | None, device: str) -> FaceDetector:
+    # 在 factory 內才匯入，讓 demo 維持不需要 PyTorch。
+    from models.univfd import UnivFDDetector
+
+    if weights_path is None:
+        raise ValueError("univfd 需要指定 weights")
+    return UnivFDDetector(weights_path=weights_path, device=device)
+
+
 MODEL_REGISTRY: dict[str, ModelFactory] = {
     "demo": _create_demo,
-    # 接入後依約定新增 cnndetection、univfd、syntheticsight。
-    # 可在各自的 factory 內再匯入模型套件，讓 demo 維持不需要 PyTorch。
+    "univfd": _create_univfd,
+    # 接入後依約定新增 cnndetection、syntheticsight。
 }
 
 

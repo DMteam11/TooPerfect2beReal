@@ -1,0 +1,12 @@
+torch==2.11.0+cu128
+torchvision==0.26.0+cu128
+numpy==2.5.4
+Pillow==12.3.0
+scikit-learn==1.9.1
+scipy==1.18.1
+ftfy==6.3.1
+regex==2026.11.25
+tqdm==4.70.1
+clip(openai/CLIP)==1.0
+# CLIP from: git+https://github.com/openai/CLIP.git@d05afc436d78f1c48dc0dbf8e5980a9d471f35f6
+# CUDA wheels: --index-url https://download.pytorch.org/whl/cu128 (torch/torchvision)
